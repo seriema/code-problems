@@ -10,15 +10,15 @@ stdin.resume();
 stdin.setEncoding( 'utf8' );
 
 // on any data into stdin
-stdin.on( 'data', function( key ){
-  // ctrl-c ( end of text )
-  if ( key === '\u0003' ) {
-    process.exit();
-  }
+stdin.on( 'data', function( input ){
+  var lines = input.split('\n');
 
-	var number = parseInt(key);
-	if (number === 42)
-		process.exit();
-	else
-		process.stdout.write( key );
+	for (var i = 0; i < lines.length; i++) {
+		var string = lines[i];
+		var number = parseInt(string);
+		if (number === 42)
+			process.exit();
+		else
+			process.stdout.write( string );
+	}
 });
