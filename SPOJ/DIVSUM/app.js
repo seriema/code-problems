@@ -9,8 +9,9 @@ var writeLn = function (msg) {
 
 var findDivisors = function (number) {
 	var divisors = [];
+	var max = number / 2;
 
-	for (var x = 1; x < number; x++) {
+	for (var x = 1; x <= max; x++) {
 		if (number % x === 0) {
 			divisors.push(x);
 		}
