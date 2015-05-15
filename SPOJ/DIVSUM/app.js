@@ -8,11 +8,20 @@ var writeLn = function (msg) {
 };
 
 var findDivisors = function (number) {
-	var divisors = [];
-	var max = number / 2;
+	if (number < 2) {
+		return [0];
+	}
 
-	for (var x = 1; x <= max; x++) {
+	var max = Math.sqrt(number);
+	var divisors = [1];
+	var tmpDiv;
+
+	for (var x = 2; x <= max; x++) {
 		if (number % x === 0) {
+			tmpDiv = number / x;
+			if (tmpDiv !== x) {
+				divisors.push(tmpDiv);
+			}
 			divisors.push(x);
 		}
 	}
