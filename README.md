@@ -5,3 +5,25 @@ I'll focus on:
 
 * [Sphere online judge (SPOJ)](http://www.spoj.com/)
 * [Kattis at KTH](https://kth.kattis.com)
+
+## Useful commands
+At least for SPOJ I use these commands to test things out.
+
+*Note:* It's assumed you're in the problem folder, e.g. `SPOJ/DIVSUM`. And that there exists a `input.txt` file with sample input data, and a `expected.txt` with matching output data that's expected if the program is correct.
+
+**Manual test:** Check what the app outputs given `input.txt` as input.
+
+````
+$ cat input.txt | node app.js
+````
+
+**Simple auto-test:** My regular work loop. Pipe `input.txt` into `app.js` and check the results against `expected.txt`.
+
+````
+$ diff <(cat input.txt | time node app.js) expected.txt --side-by-side
+````
+
+**Stress test:** See if the app crashes due to too much input or large numbers.
+````
+$ cat ../stress.txt | node app.js &> /dev/null
+````
