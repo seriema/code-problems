@@ -22,7 +22,7 @@ var findDivisors = function (number) {
 var sumAll = function (arr) {
 	return arr.reduce(function(previousValue, currentValue) {
 		return previousValue + currentValue;
-	});
+	}, 0);
 };
 
 
