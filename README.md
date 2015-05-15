@@ -25,5 +25,5 @@ $ diff <(cat input.txt | time node app.js) expected.txt --side-by-side
 
 **Stress test:** See if the app crashes due to too much input or large numbers.
 ````
-$ cat ../stress.txt | node app.js &> /dev/null
+$ time (cat ../stress.txt | node app.js &> /dev/null)
 ````
