@@ -19,7 +19,25 @@ var countCookies = function (nrPiles, shortestPile, heightDifference) {
 	return sum;
 };
 
-var input = '';
+var lines = (function () {
+	var input = '';
+	var lines;
+	var line = 0;
+
+	return {
+		addInput: function (buf) {
+			input += buf.toString();
+		},
+		setup: function () {
+			lines = input.split(endOfLine);
+		},
+		next: function () {
+			return lines[line++];
+		}
+	};
+}());
+
+
 // resume stdin in the parent process (node app won't quit all by itself
 // unless an error or process.exit() happens)
 stdin.resume();
@@ -27,18 +45,18 @@ stdin.resume();
 // i don't want binary, do you?
 stdin.setEncoding( 'utf8' );
 
-process.stdin.on('data', function(buf) { input += buf.toString(); });
+process.stdin.on('data', lines.addInput);
 // on data from stdin
 stdin.on('end', function(){
-	var lines = input.split(endOfLine);
+	lines.setup();
+	var lineNr = 0;
 
 	// Read how many test cases there are
-	var nrTestCases = parseInt(lines[0]);
+	var nrTestCases = parseInt(lines.next());
 
 	// Read the test cases
-	var offset = 1;
 	for (var i = 0; i < nrTestCases; i++) {
-		var line = lines[offset+i];
+		var line = lines.next();
 		var data = line.split(' ');
 		var nrPins = parseInt(data[0]);
 		var nrColours = parseInt(data[1]);
@@ -51,8 +69,8 @@ writeLn('guessed ' + nrGuessed);
 		// Read "guesses"
 		var nrGuesses = nrGuessed * 2;
 		for (var g = 0; g < nrGuesses; g+=2) {
-			var colors = lines[offset+i+g+1].split(' ');
-			var points = lines[offset+i+g+2].split(' ');
+			var colors = lines.next().split(' ');
+			var points = lines.next().split(' ');
 
 			writeLn('c ' + colors);
 			writeLn('p ' + points);
@@ -60,7 +78,6 @@ writeLn('guessed ' + nrGuessed);
 			var pointsBlack = parseInt(points[0]);
 			var pointsWhite = parseInt(points[1]);
 		}
-		offset += nrGuesses;
 
 		// Solve the test case
 		//var nrCookies = countCookies(nrPiles, shortestPile, heightDifference);
