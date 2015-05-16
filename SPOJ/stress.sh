@@ -1,2 +1,2 @@
 #!/bin/bash
-(time (cat ../stress.txt | node app.js &> /dev/null)) 2> stresstime.txt ; cat stresstime.txt
+(cat ../stress.txt | ((time node app.js) 2> stresstime.txt) &> /dev/null) ; cat stresstime.txt
