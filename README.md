@@ -18,17 +18,17 @@ $ ../run.sh
 # cat input.txt | node app.js
 ````
 
-**Simple auto-test:** My regular work loop. Pipe `input.txt` into `app.js` and check the results against `expected.txt`. Also saves the running time in `time.txt`.
+**Simple auto-test:** My regular work loop. Pipe `input.txt` into `app.js` and check the results against `expected.txt`. Also saves the running time in `time_test.txt`.
 
 ````
 $ ../test.sh
-# diff <(cat input.txt | (time node app.js) 2> time.txt) expected.txt --side-by-side ; cat time.txt
+# diff <(cat input.txt | (time node app.js) 2> time_test.txt) expected.txt --side-by-side ; cat time_test.txt
 ````
 
-**Stress test:** See if the app crashes due to too much input or large numbers. Also saves the running time in `stresstime.txt`.
+**Stress test:** See if the app crashes due to too much input or large numbers. Also saves the running time in `time_stress.txt`.
 ````
 $ ../stress.sh
-# (cat ../stress.txt | ((time node app.js) 2> stresstime.txt) &> /dev/null) ; cat stresstime.txt
+# (cat ../stress.txt | ((time node app.js) 2> time_stress.txt) &> /dev/null) ; cat time_stress.txt
 ````
 
 ## Accepted answers
