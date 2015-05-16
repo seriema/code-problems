@@ -27,3 +27,18 @@ $ diff <(cat input.txt | (time node app.js) 2> time.txt) expected.txt --side-by-
 ````
 $ (time (cat ../stress.txt | node app.js &> /dev/null)) 2> stresstime.txt ; cat stresstime.txt
 ````
+
+## Accepted answers
+
+### SPOJ
+All in folder `SPOJ/`.
+
+PROBLEM | ID | TIME | MEM | LANG | DATE
+------------- | -------------
+TEST | 14253161 | 0.04 | 65M | NODEJS | 2015-05-15
+DIVSUM | 14259035 | 2.16 | 119M | NODEJS | 2015-05-16
+AMR10F | 14260992 | 0.05 | 119M | NODEJS | 2015-05-16
+
+## Other answers
+
+* SPOJ/PRIME1 - did it before realizing that NODEJS wasn't an accepted lang.
