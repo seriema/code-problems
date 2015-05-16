@@ -17,13 +17,13 @@ At least for SPOJ I use these commands to test things out.
 $ cat input.txt | node app.js
 ````
 
-**Simple auto-test:** My regular work loop. Pipe `input.txt` into `app.js` and check the results against `expected.txt`.
+**Simple auto-test:** My regular work loop. Pipe `input.txt` into `app.js` and check the results against `expected.txt`. Also saves the running time in `time.txt`.
 
 ````
-$ diff <(cat input.txt | time node app.js) expected.txt --side-by-side
+$ diff <(cat input.txt | (time node app.js) 2> time.txt) expected.txt --side-by-side && cat time.txt
 ````
 
-**Stress test:** See if the app crashes due to too much input or large numbers.
+**Stress test:** See if the app crashes due to too much input or large numbers. Also saves the running time in `stresstime.txt`.
 ````
-$ time (cat ../stress.txt | node app.js &> /dev/null)
+$ (time (cat ../stress.txt | node app.js &> /dev/null)) 2> stresstime.txt && cat stresstime.txt
 ````
