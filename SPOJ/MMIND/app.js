@@ -1,22 +1,15 @@
-// http://www.spoj.com/problems/AMR10F/
+// http://www.spoj.com/problems/MMIND/
 
 var stdin = process.stdin;
 var endOfLine = require('os').EOL;
 
+// Utility methods
 var writeLn = function (msg) {
 	process.stdout.write(msg + endOfLine);
 };
 
-var countCookies = function (nrPiles, shortestPile, heightDifference) {
-	var sum = 0;
-	var currentPile = shortestPile;
-
-	for (var c = 0; c < nrPiles; c++) {
-		sum += currentPile;
-		currentPile += heightDifference;
-	}
-
-	return sum;
+var writeArr = function (arr) {
+	writeLn(arr.join(' '));
 };
 
 var lines = (function () {
@@ -37,6 +30,87 @@ var lines = (function () {
 	};
 }());
 
+// Problem solution
+var calcPoints = function (nrPins, solution, guessOriginal) {
+	var pointsBlack = 0;
+	var pointsWhite = 0;
+	var guess = guessOriginal.slice();
+
+	for (var x = 0; x < nrPins; x++) {
+		if (solution[x] === guess[x]) {
+			pointsBlack++;
+			guess[x] = undefined;
+		}
+	}
+
+	for (var i = 0; i < nrPins; i++) {
+		for (var j = 0; j < nrPins; j++) {
+			if (i !== j && solution[i] === guess[j]) {
+				pointsWhite++;
+				guess[j] = undefined;
+			}
+		}
+	}
+
+	return [pointsBlack, pointsWhite];
+};
+
+var sumAll = function (arr) {
+	return arr.reduce(function(previousValue, currentValue) {
+		return previousValue + currentValue;
+	}, 0);
+};
+
+var parseIntArr = function (stringArray) {
+	return stringArray.map(function(str) {
+		return parseInt(str);
+	});
+};
+
+var permutate = function(nrPins, minColour, maxColour, guess) {
+	if (sumAll(guess) === nrPins*maxColour)
+		return;
+
+	for (var x = nrPins-1; x >= 0; x--) {
+		if (guess[x] === maxColour) {
+			guess[x] = minColour;
+		} else {
+			guess[x]++;
+			return guess;
+		}
+	}
+
+	return guess;
+};
+
+var isValidSolution = function(nrPins, solution, guesses, points) {
+	for(var x = 0; x < guesses.length; x++) {
+		var pts = calcPoints(nrPins, solution, guesses[x]);
+		var differentPoints = pts[0] !== points[x][0] || pts[1] !== points[x][1];
+
+		if (differentPoints)
+			return false;
+	}
+
+	return true;
+};
+
+var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
+	var mock = [];
+
+	for (var i = 0; i < nrPins; i++) {
+		mock.push(1);
+	}
+
+	var newGuess = mock;
+	while(!isValidSolution(nrPins, newGuess, guesses, points)) {
+		newGuess = permutate(nrPins, minColour, maxColour, newGuess);
+		if (newGuess === undefined)
+			return;
+	}
+
+	return newGuess;
+};
 
 // resume stdin in the parent process (node app won't quit all by itself
 // unless an error or process.exit() happens)
@@ -45,11 +119,31 @@ stdin.resume();
 // i don't want binary, do you?
 stdin.setEncoding( 'utf8' );
 
+
+
+//var solution = [1, 1, 1, 3];
+// Points should be [1, 1]
+//var guess = [1, 2, 3, 2];
+// Points should be [1, 1]
+//var guess = [2, 1, 3, 2];
+
+//var solution = [9, 9, 9, 9, 9, 9, 9, 9];
+// Points should be [0, 0]
+//var guess = [1, 2, 3, 4, 5, 6, 7, 8];
+// Points should be [1, 0]
+//var guess = [2, 3, 4, 5, 6, 7, 8, 9];
+// Points should be [2, 0]
+//var guess = [3, 4, 5, 6, 7, 8, 9, 9];
+
+//var points = calcPoints(solution.length, solution, guess);
+//writeLn('points: ' + points[0] + ' ' + points[1]);
+
+
+
 process.stdin.on('data', lines.addInput);
 // on data from stdin
 stdin.on('end', function(){
 	lines.setup();
-	var lineNr = 0;
 
 	// Read how many test cases there are
 	var nrTestCases = parseInt(lines.next());
@@ -60,28 +154,32 @@ stdin.on('end', function(){
 		var data = line.split(' ');
 		var nrPins = parseInt(data[0]);
 		var nrColours = parseInt(data[1]);
+		var minColour = 1; // From documentation.
+		var maxColour = nrColours;
 		var nrGuessed = parseInt(data[2]);
 
-		writeLn('pins ' + nrPins);
-		writeLn('colours ' + nrColours);
-writeLn('guessed ' + nrGuessed);
-// Väntad: 4 3 2, 4 6 2, 8 9 3
 		// Read "guesses"
 		var nrGuesses = nrGuessed * 2;
+		var allGuesses = [];
+		var allPoints = [];
 		for (var g = 0; g < nrGuesses; g+=2) {
-			var colors = lines.next().split(' ');
+			var coloursString = lines.next().split(' ');
+			var colours = parseIntArr(coloursString);
 			var points = lines.next().split(' ');
-
-			writeLn('c ' + colors);
-			writeLn('p ' + points);
-
 			var pointsBlack = parseInt(points[0]);
 			var pointsWhite = parseInt(points[1]);
+
+			allGuesses.push(colours);
+			allPoints.push([pointsBlack, pointsWhite]);
 		}
 
 		// Solve the test case
-		//var nrCookies = countCookies(nrPiles, shortestPile, heightDifference);
-		//writeLn(nrCookies);
+		var guess = newGuess(nrPins, minColour, maxColour, allGuesses, allPoints);
+		if (guess === undefined) {
+			writeLn('You are cheating!');
+		} else {
+			writeArr(guess);
+		}
 	}
 
 	process.exit();
