@@ -99,7 +99,7 @@ var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
 	var mock = [];
 
 	for (var i = 0; i < nrPins; i++) {
-		mock.push(1);
+		mock.push(minColour);
 	}
 
 	var newGuess = mock;
