@@ -7,16 +7,17 @@ var writeLn = function (msg) {
 	process.stdout.write(msg + endOfLine);
 };
 
+// http://en.wikipedia.org/wiki/Triangular_number
+var triangles = [];
+var triangularNumber = function (n) {
+	if (triangles[n])
+		return triangles[n];
+
+	return n*(n+1)/2;
+};
+
 var countCookies = function (nrPiles, shortestPile, heightDifference) {
-	var sum = 0;
-	var currentPile = shortestPile;
-
-	for (var c = 0; c < nrPiles; c++) {
-		sum += currentPile;
-		currentPile += heightDifference;
-	}
-
-	return sum;
+	return shortestPile*nrPiles+heightDifference*triangularNumber(nrPiles-1);
 };
 
 var input = '';
