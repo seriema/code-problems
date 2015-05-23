@@ -54,7 +54,7 @@ var calcPoints = function (nrPins, solution, guessOriginal) {
 		}
 	}
 
-	return [pointsBlack, pointsWhite];
+	return { black: pointsBlack, white: pointsWhite };
 };
 
 var sumAll = function (arr) {
@@ -98,7 +98,7 @@ var permutate = function(nrPins, minColour, maxColour, guess, uselessColours) {
 var isValidSolution = function(nrPins, solution, guesses, points) {
 	for(var x = 0; x < guesses.length; x++) {
 		var pts = calcPoints(nrPins, solution, guesses[x]);
-		var differentPoints = pts[0] !== points[x][0] || pts[1] !== points[x][1];
+		var differentPoints = pts.black !== points[x].black || pts.white !== points[x].white;
 
 		if (differentPoints)
 			return false;
@@ -116,7 +116,7 @@ var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
 		uselessColours[jj] = false;
 	}
 	for (var j = 0; j < points.length; j++) {
-		if (points[j][0] === 0 && points[j][1] === 0) {
+		if (points[j].black === 0 && points[j].white === 0) {
 			guesses[j].forEach(function(colour) {
 				uselessColours[colour] = true;
 			});
@@ -199,7 +199,7 @@ stdin.on('end', function(){
 			var pointsWhite = parseInt(points[1]);
 
 			allGuesses.push(colours);
-			allPoints.push([pointsBlack, pointsWhite]);
+			allPoints.push({ black: pointsBlack, white: pointsWhite });
 		}
 
 		// Solve the test case
