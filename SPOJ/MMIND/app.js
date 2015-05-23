@@ -95,16 +95,14 @@ var permutate = function(nrPins, minColour, maxColour, guess, uselessColours) {
 	return guess;
 };
 
-var isValidSolution = function(nrPins, solution, guesses, points) {
-	for(var x = 0; x < guesses.length; x++) {
-		var pts = calcPoints(nrPins, solution, guesses[x]);
-		var differentPoints = pts.black !== points[x].black || pts.white !== points[x].white;
 
-		if (differentPoints)
-			return false;
+var isValidSolution = function(nrPins, solution, guesses, points) {
+	function matchingPoints (guess, index) {
+		var pts = calcPoints(nrPins, solution, guess);
+		return pts.black === points[index].black && pts.white === points[index].white;
 	}
 
-	return true;
+	return guesses.every(matchingPoints);
 };
 
 var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
@@ -115,13 +113,13 @@ var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
 	for (var jj = minColour; jj <= maxColour; jj++) {
 		uselessColours[jj] = false;
 	}
-	for (var j = 0; j < points.length; j++) {
-		if (points[j].black === 0 && points[j].white === 0) {
-			guesses[j].forEach(function(colour) {
+	points.forEach(function (point, index) {
+		if (point.black === 0 && point.white === 0) {
+			guesses[index].forEach(function(colour) {
 				uselessColours[colour] = true;
 			});
 		}
-	}
+	});
 
 	var optimizedMinColour = uselessColours.indexOf(false);
 	var optimizedMaxColour = uselessColours.lastIndexOf(false);
