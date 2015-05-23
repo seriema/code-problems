@@ -8,12 +8,14 @@ var writeLn = function (msg) {
 };
 
 var findDivisors = function (number) {
+	// A proper divisor is strictly less than `number`.
+	// Since all numbers are divisible by 1, and no number is divisible by 0, we exit early.
 	if (number < 2) {
 		return [0];
 	}
 
-	var max = Math.sqrt(number);
-	var divisors = [1];
+	var divisors = [1]; // 1 is always a valid divisor.
+	var max = Math.sqrt(number); // We'll be using a nifty fact: when we find one divisor, we actually find two: the divisor and the quotent. E.g. 10/2=5, 2 is the divisor and 5 is the quotent, but actually both are divisors since 10/5=2. So we only have to check possible divisors between 2 and sqrt(number).
 	var tmpDiv;
 
 	for (var x = 2; x <= max; x++) {
