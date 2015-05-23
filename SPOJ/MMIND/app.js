@@ -36,6 +36,7 @@ var calcPoints = function (nrPins, solution, guessOriginal) {
 	var pointsWhite = 0;
 	var guess = guessOriginal.slice();
 
+	// Calculate black points
 	for (var x = 0; x < nrPins; x++) {
 		if (solution[x] === guess[x]) {
 			pointsBlack++;
@@ -43,6 +44,7 @@ var calcPoints = function (nrPins, solution, guessOriginal) {
 		}
 	}
 
+	// Calculate white points
 	for (var i = 0; i < nrPins; i++) {
 		for (var j = 0; j < nrPins; j++) {
 			if (i !== j && solution[i] === guess[j]) {
@@ -67,17 +69,27 @@ var parseIntArr = function (stringArray) {
 	});
 };
 
-var permutate = function(nrPins, minColour, maxColour, guess) {
-	if (sumAll(guess) === nrPins*maxColour)
+var nextColour = function (c, uselessColours, minColour, maxColour) {
+	do {
+		c++;
+		if (c > maxColour)
+			return { looped: true, value: minColour };
+	} while(uselessColours[c]);
+
+	return { looped: false, value: c };
+};
+
+var permutate = function(nrPins, minColour, maxColour, guess, uselessColours) {
+	var sumColours = sumAll(guess);
+	var isMaxedOut = sumColours === nrPins*maxColour || nrPins*minColour === nrPins*maxColour;
+	if (isMaxedOut)
 		return;
 
 	for (var x = nrPins-1; x >= 0; x--) {
-		if (guess[x] === maxColour) {
-			guess[x] = minColour;
-		} else {
-			guess[x]++;
+		var nxt = nextColour(guess[x], uselessColours, minColour, maxColour);
+		guess[x] = nxt.value;
+		if (!nxt.looped)
 			return guess;
-		}
 	}
 
 	return guess;
@@ -98,13 +110,30 @@ var isValidSolution = function(nrPins, solution, guesses, points) {
 var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
 	var mock = [];
 
+	// Set up colours we know we can ignore
+	var uselessColours = [];
+	for (var jj = minColour; jj <= maxColour; jj++) {
+		uselessColours[jj] = false;
+	}
+	for (var j = 0; j < points.length; j++) {
+		if (points[j][0] === 0 && points[j][1] === 0) {
+			guesses[j].forEach(function(colour) {
+				uselessColours[colour] = true;
+			});
+		}
+	}
+
+	var optimizedMinColour = uselessColours.indexOf(false);
+	var optimizedMaxColour = uselessColours.lastIndexOf(false);
+	minColour = optimizedMinColour > -1 ? optimizedMinColour : minColour;
+	maxColour = optimizedMaxColour > -1 ? optimizedMaxColour : maxColour;
 	for (var i = 0; i < nrPins; i++) {
 		mock.push(minColour);
 	}
 
 	var newGuess = mock;
 	while(!isValidSolution(nrPins, newGuess, guesses, points)) {
-		newGuess = permutate(nrPins, minColour, maxColour, newGuess);
+		newGuess = permutate(nrPins, minColour, maxColour, newGuess, uselessColours);
 		if (newGuess === undefined)
 			return;
 	}
