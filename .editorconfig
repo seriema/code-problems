@@ -1,0 +1,18 @@
+; EditorConfig is awesome: http://EditorConfig.org
+
+; top-most EditorConfig file
+root = true
+
+; Unix-style newlines with a newline ending every file and no trailing whitespace
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+; Tab indentation
+[*]
+indent_style = tab
+
+; Set default charset
+[*.{js,json,html,css,less,scss,sass}]
+charset = utf-8
