@@ -64,6 +64,7 @@ var sumAll = function (arr) {
 };
 
 var parseIntArr = function (stringArray) {
+	// parseInt() takes multiple arguments, so it can't be passed directly.
 	return stringArray.map(function(str) {
 		return parseInt(str);
 	});
