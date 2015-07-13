@@ -7,9 +7,8 @@ var endOfLine = require('os').EOL;
 var writeLn = function (msg) {
 	process.stdout.write(msg + endOfLine);
 };
-
-var writeArr = function (arr) {
-	writeLn(arr.join(' '));
+var writeArr = function (arr, msg) {
+	writeLn((msg ? (msg + ': ') : '') + arr.join(' '));
 };
 
 var lines = (function () {
@@ -34,7 +33,7 @@ var lines = (function () {
 var calcPoints = function (nrPins, solution, guessOriginal) {
 	var pointsBlack = 0;
 	var pointsWhite = 0;
-	var guess = guessOriginal.slice();
+	var guess = guessOriginal.slice(); // make a copy
 
 	// Calculate black points
 	for (var x = 0; x < nrPins; x++) {
@@ -70,69 +69,109 @@ var parseIntArr = function (stringArray) {
 	});
 };
 
-var nextColour = function (c, uselessColours, minColour, maxColour) {
+var nextColour = function (c, possiblePins, minColour, maxColour) {
+	if (c === undefined)
+		c = 0;
+	else
+		possiblePins[c]++;
+
 	do {
 		c++;
-		if (c > maxColour)
-			return { looped: true, value: minColour };
-	} while(uselessColours[c]);
+		if (c > maxColour) {
+			return { maxedColour: true, value: undefined };
+		}
+	} while(possiblePins[c] === 0);
 
-	return { looped: false, value: c };
+	possiblePins[c]--;
+	return { maxedColour: false, value: c };
 };
 
-var permutate = function(nrPins, minColour, maxColour, guess, uselessColours) {
-	var sumColours = sumAll(guess);
-	var isMaxedOut = sumColours === nrPins*maxColour || nrPins*minColour === nrPins*maxColour;
-	if (isMaxedOut)
+var permutate = function(nrPins, minColour, maxColour, guess, possiblePins) {
+	var isMaxedOut = sumAll(guess) === nrPins*maxColour;
+	var onlyOneColor = minColour === maxColour;
+	if (isMaxedOut || onlyOneColor)
 		return;
 
-	for (var x = nrPins-1; x >= 0; x--) {
-		var nxt = nextColour(guess[x], uselessColours, minColour, maxColour);
-		guess[x] = nxt.value;
-		if (!nxt.looped)
-			return guess;
+	var nxt = { maxedColour: true };
+	// keep going to the left as long as the color overflows
+	for (var rtlPos = nrPins; rtlPos >= 0 && nxt.maxedColour;) {
+		rtlPos--;
+		nxt = nextColour(guess[rtlPos], possiblePins, minColour, maxColour);
+		guess[rtlPos] = nxt.value;
+	}
+
+	// maxed the highest number means there aren't any higher guesses
+	if (rtlPos === 0 && nxt.maxedColour) {
+		return;
+	}
+
+	// then recreate the empty area with available colours
+	for (var ltrPos = rtlPos+1; ltrPos < nrPins; ltrPos++) {
+		nxt = nextColour(guess[ltrPos], possiblePins, minColour, maxColour);
+		guess[ltrPos] = nxt.value;
 	}
 
 	return guess;
 };
 
-
 var isValidSolution = function(nrPins, solution, guesses, points) {
 	function matchingPoints (guess, index) {
 		var pts = calcPoints(nrPins, solution, guess);
+//		var pts = calcPoints(nrPins, guess, solution); // TODO: Do I have the order correct?
+
 		return pts.black === points[index].black && pts.white === points[index].white;
 	}
 
-	return guesses.every(matchingPoints);
+	var isValid = guesses.every(matchingPoints);
+	return isValid;
 };
 
-var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
-	var mock = [];
-
-	// Set up colours we know we can ignore
-	var uselessColours = [];
-	for (var jj = minColour; jj <= maxColour; jj++) {
-		uselessColours[jj] = false;
+var minimalPinsPossible = function(nrPins, minColour, maxColour, guesses, points) {
+	var possiblePins = [];
+	for (var c = minColour; c <= maxColour; c++) {
+		possiblePins[c] = nrPins;
 	}
+
 	points.forEach(function (point, index) {
+		// THIS COLOUR IS NOT VALID
 		if (point.black === 0 && point.white === 0) {
 			guesses[index].forEach(function(colour) {
-				uselessColours[colour] = true;
+				possiblePins[colour] = 0;
 			});
+		}
+		// REDUCE PINS FOR COLOURS
+		else {
+			var colourCount = [];
+			guesses[index].forEach(function(colour) {
+				if (colourCount[colour])
+					colourCount[colour]++;
+				else
+					colourCount[colour] = 1;
+			});
+
+			var pointsSum = point.black + point.white;
+			for (var c = minColour; c <= maxColour; c++) {
+				if (colourCount[c] > pointsSum)
+					possiblePins[c] = Math.min(possiblePins[c], nrPins - pointsSum);
+			}
 		}
 	});
 
-	var optimizedMinColour = uselessColours.indexOf(false);
-	var optimizedMaxColour = uselessColours.lastIndexOf(false);
-	minColour = optimizedMinColour > -1 ? optimizedMinColour : minColour;
-	maxColour = optimizedMaxColour > -1 ? optimizedMaxColour : maxColour;
+	return possiblePins;
+};
+
+var newGuess = function(nrPins, minColour, maxColour, guesses, points) {
+	var possiblePins = minimalPinsPossible(nrPins, minColour, maxColour, guesses, points);
+
+	var startGuess = [];
 	for (var i = 0; i < nrPins; i++) {
-		mock.push(minColour);
+		var reset = nextColour(undefined, possiblePins, minColour, maxColour);
+		startGuess[i] = reset.value;
 	}
 
-	var newGuess = mock;
+	var newGuess = startGuess;
 	while(!isValidSolution(nrPins, newGuess, guesses, points)) {
-		newGuess = permutate(nrPins, minColour, maxColour, newGuess, uselessColours);
+		newGuess = permutate(nrPins, minColour, maxColour, newGuess, possiblePins);
 		if (newGuess === undefined)
 			return;
 	}
@@ -185,7 +224,6 @@ stdin.on('end', function(){
 		var minColour = 1; // From documentation.
 		var maxColour = nrColours;
 		var nrGuessed = parseInt(data[2]);
-
 		// Read "guesses"
 		var nrGuesses = nrGuessed * 2;
 		var allGuesses = [];
