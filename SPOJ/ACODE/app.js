@@ -4,28 +4,29 @@ var stdin = process.stdin;
 var endOfLine = require('os').EOL;
 
 var countPossibleDecodings = function (codedMessage, maxChar, numCharsToCheck, cache, startPosition) {
-	if (startPosition >= codedMessage.length)
+	if (startPosition+1 >= codedMessage.length)
 		return 1;
 
-	var i = startPosition || 1;
-	var word = codedMessage.substr(i-1, numCharsToCheck); // 3
-	var futurePos = i-1+numCharsToCheck;
-	var future = codedMessage.substr(futurePos); // 333333
-	var number = parseInt(word, 10);
+	var i = startPosition || 0;
+	var word = codedMessage.substr(i, numCharsToCheck);
+	var future = codedMessage.substr(i+numCharsToCheck);
 
-	if ((futurePos < codedMessage.length) && cache[future]) {
+	if (cache[future]) {
 		return cache[future];
 	}
 
-	if (number <= maxChar && word[0] !== '0' && word[1] !== '0') {
-		var decodings = countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+1) + countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+2);
+	var number = parseInt(word, 10);
+	var decodings = countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+1);
+
+	var hasZero = word[0] === '0' || word[1] === '0' || future[0] === '0'; // '01', '10', and '110' can only have one decoding.
+	if (number <= maxChar && !hasZero) {
+		decodings += countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+2);
 		cache[future] = decodings;
 		return decodings;
 	}
 
-	var decodings2 = countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+1);
-	cache[future] = decodings2;
-	return decodings2;
+	cache[future] = decodings;
+	return decodings;
 };
 
 
