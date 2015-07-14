@@ -3,33 +3,43 @@
 var stdin = process.stdin;
 var endOfLine = require('os').EOL;
 
-
-var countPossibleDecodings = function (codedMessage, max, numCharsToCheck, startPosition) {
+var countPossibleDecodings = function (codedMessage, maxChar, numCharsToCheck, cache, startPosition) {
 	if (startPosition >= codedMessage.length)
 		return 1;
 
 	var i = startPosition || 1;
-	var word = codedMessage.substr(i-1, numCharsToCheck);
+	var word = codedMessage.substr(i-1, numCharsToCheck); // 3
+	var futurePos = i-1+numCharsToCheck;
+	var future = codedMessage.substr(futurePos); // 333333
 	var number = parseInt(word, 10);
 
-	if (number <= max && word[0] !== '0' && word[1] !== '0') {
-		return countPossibleDecodings(codedMessage, max, numCharsToCheck, i+1) + countPossibleDecodings(codedMessage, max, numCharsToCheck, i+2);
+	if ((futurePos < codedMessage.length) && cache[future]) {
+		return cache[future];
 	}
 
-	return countPossibleDecodings(codedMessage, max, numCharsToCheck, i+1);
+	if (number <= maxChar && word[0] !== '0' && word[1] !== '0') {
+		var decodings = countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+1) + countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+2);
+		cache[future] = decodings;
+		return decodings;
+	}
+
+	var decodings2 = countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache, i+1);
+	cache[future] = decodings2;
+	return decodings2;
 };
 
 
 // --- START HERE ---
 var main = function (lines) {
-	var max = 28; // Highest number that can become a letter. Specified in SPOJ instructions and not through input.
-	var numCharsToCheck = max.toString().length;
+	var maxChar = 28; // Highest number that can become a letter. Specified in SPOJ instructions and not through input.
+	var numCharsToCheck = maxChar.toString().length;
 
 	// Keep reading until read '0'.
 	var line;
 	while((line = lines.next()) !== '0') {
 		var codedMessage = line;
-		var numDecodesPossible = countPossibleDecodings(codedMessage, max, numCharsToCheck);
+		var cache = [];
+		var numDecodesPossible = countPossibleDecodings(codedMessage, maxChar, numCharsToCheck, cache);
 
 		writeLn(numDecodesPossible);
 	}
