@@ -25,14 +25,14 @@ var addBigInt = function (a1, a2) {
 	var carry = 0;
 	for (var i = smallerInt.length-1, j = largerInt.length-1; j >= 0; i--, j--) {
 		var tmp = largerInt[j] + carry;
+
 		if (i >= 0) {
 			tmp += smallerInt[i];
 		}
-		var rest = tmp % 10;
-		var carryOver = Math.floor(tmp / 10);
 
+		var rest = tmp % 10;
 		sum.unshift(rest);
-		carry = carryOver;
+		carry = Math.floor(tmp / 10);
 	}
 
 	if (carry > 0)
