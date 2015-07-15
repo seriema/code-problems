@@ -15,20 +15,28 @@ At least for SPOJ I use these commands to test things out.
 
 ````
 $ ../run.sh
-# cat input.txt | node app.js
 ````
 
-**Simple auto-test:** My regular work loop. Pipe `input.txt` into `app.js` and check the results against `expected.txt`. Also saves the running time in `time_test.txt`.
+**Simple auto-test:** My regular work script. Pipe `input.txt` into `app.js` and check the results against `expected.txt`. Also saves the running time in `time_test.txt`.
 
 ````
 $ ../test.sh
-# diff <(cat input.txt | (time node app.js) 2> time_test.txt) expected.txt --side-by-side ; cat time_test.txt
+````
+
+**Simpler auto-test:** My work script for problems where one input line matches one output line. Has nicer comparison table. Pipe `input.txt` into `app.js` and check the results against `expected.txt`, then output using `column` to get a input-output-expected table. Also saves the running time in `time_test.txt`.
+
+````
+$ ../test2.sh
 ````
 
 **Stress test:** See if the app crashes due to too much input or large numbers. Also saves the running time in `time_stress.txt`.
 ````
 $ ../stress.sh
-# (cat ../stress.txt | ((time node app.js) 2> time_stress.txt) &> /dev/null) ; cat time_stress.txt
+````
+
+**Minify:** Some problems require smaller source code and I don't want to sacrifice readability unnecessarily. Creates a `app.min.js` file and verifies that the program still works (using a simplified version of `test.sh`). *Note:* requires [uglify-js](https://www.npmjs.com/package/uglify-js) to be installed and in PATH.
+````
+$ ../uglify.sh
 ````
 
 ## Accepted answers
