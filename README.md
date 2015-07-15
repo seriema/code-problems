@@ -39,8 +39,8 @@ All in folder `SPOJ/`.
 PROBLEM  | ID | TIME | MEM | LANG | DATE
 -------  | --- | ---:| ---:| ---- | ----
 TEST | 14253161 | 0.04 | 65M | NODEJS | 2015-05-15
-DIVSUM  | 14259035 | 2.16 | 119M | NODEJS | 2015-05-16
-AMR10F  | 14308063 | 0.04 | 67M | NODEJS | 2015-05-23
+DIVSUM | 14259035 | 2.16 | 119M | NODEJS | 2015-05-16
+AMR10F | 14308063 | 0.04 | 67M | NODEJS | 2015-05-23
 
 ## Other answers
 
