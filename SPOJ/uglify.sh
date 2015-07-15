@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# uglify (run `npm install uglifyjs [-g]` if you don't have it)
+# uglify (run `npm install uglify-js [-g]` if you don't have it)
 # --screw-ie8     Don't try to be IE-proof
 # --mangle-props  Mangle property names
 # -m              Mangle names/pass mangler options.
