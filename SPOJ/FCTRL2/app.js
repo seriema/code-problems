@@ -75,14 +75,17 @@ var multiplyBigInt = function (f1, f2) {
 };
 
 var calcFactorial = function (factorialTarget, cache) {
-	var bigInt = createBigInt(1);
-	for (var f = 1; f <= factorialTarget; f++) {
-		bigInt = multiplyBigInt(bigInt, createBigInt(f));
-	}
+	if (factorialTarget === 0)
+		return createBigInt(1);
 
-	return bigIntToString(bigInt);
+	if (cache[factorialTarget])
+		return cache[factorialTarget];
+
+	var nextFactorial = calcFactorial(factorialTarget-1, cache);
+	var factorial = multiplyBigInt(nextFactorial, createBigInt(factorialTarget));
+	cache[factorialTarget] = factorial;
+	return factorial;
 };
-
 
 // --- START HERE ---
 var main = function (lines) {
@@ -94,7 +97,7 @@ var main = function (lines) {
 		var factorialTarget = parseInt(lines.next(), 10);
 		var factorial = calcFactorial(factorialTarget, cache);
 
-		writeLn(factorial);
+		writeLn(bigIntToString(factorial));
 	}
 };
 
