@@ -45,7 +45,7 @@ var multiplyBigInt = function (f1, f2) {
 	var largerInt = f1.length >= f2.length ? f1 : f2;
 	var smallerInt = f1.length < f2.length ? f1 : f2;
 
-	var toSum = [];
+	var product = createBigInt(0);
 	for (var j = smallerInt.length-1; j >= 0; j--) {
 		var partialProduct = [];
 		for (var grow=0; grow < smallerInt.length-j-1; grow++) {
@@ -64,12 +64,8 @@ var multiplyBigInt = function (f1, f2) {
 		if (carry > 0)
 			partialProduct.unshift(carry);
 
-		toSum.push(partialProduct);
+		product = addBigInt(product, partialProduct);
 	}
-
-	var product = toSum.reduce(function (product, p) {
-		return addBigInt(product, p);
-	});
 
 	return product;
 };
