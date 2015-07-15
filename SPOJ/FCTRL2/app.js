@@ -3,13 +3,60 @@
 var stdin = process.stdin;
 var endOfLine = require('os').EOL;
 
-var calcFactorial = function (factorialTarget, cache) {
-	var factorial = 1;
-	for (var f = 1; f <= factorialTarget; f++) {
-		factorial *= f;
+
+var createBigInt = function (regularInt) {
+	var bigInt = [0];
+	addBigInt(bigInt, regularInt);
+	return bigInt;
+};
+
+var addBigInt = function (bigInt, regularInt, start) {
+	if (start < 0) {
+		bigInt.unshift(regularInt); // more than one digits could happen, so I need a bigInt ctor
+		return;
 	}
 
-	return factorial;
+	var i = start !== undefined ? start : bigInt.length-1;
+	var tmp = bigInt[i] + regularInt;
+	var rest = tmp % 10;
+	var carryOver = Math.floor(tmp / 10);
+
+	bigInt[i] = rest;
+	if (carryOver > 0) {
+		addBigInt(bigInt, carryOver, i-1);
+	}
+};
+
+var multiplyBigInt = function (bigInt, regularInt) {
+	if (regularInt === 0)
+		return bigInt.splice(0, bigInt.length, 0); // remove all, add 0
+
+	var carry = 0
+	for (var i = bigInt.length-1; i >= 0; i--) {
+		var tmp = bigInt[i] * regularInt;
+		var rest = tmp % 10;
+		var nextCarry = Math.floor(tmp / 10);
+
+		bigInt[i] = rest;
+		if (carry > 0) {
+			addBigInt(bigInt, carry, i);
+		}
+		carry = nextCarry;
+	}
+
+	// One left over
+	if (carry > 0)
+		addBigInt(bigInt, carry, i-1);
+};
+
+var calcFactorial = function (factorialTarget, cache) {
+	var factorial = 1;
+	var bigInt = [1];
+	for (var f = 1; f <= factorialTarget; f++) {
+		multiplyBigInt(bigInt, f);
+	}
+
+	return bigInt.join('');
 };
 
 
@@ -73,3 +120,9 @@ stdin.on('end', function(){
 
 	process.exit();
 });
+
+
+// --- EXPORT METHODS FOR DEBUG HERE
+exports.createBigInt = createBigInt;
+exports.multiplyBigInt = multiplyBigInt;
+exports.addBigInt = addBigInt;
