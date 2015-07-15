@@ -4,58 +4,83 @@ var endOfLine = require('os').EOL;
 
 
 var createBigInt = function (regularInt) {
-	var bigInt = [0];
-	addBigInt(bigInt, regularInt);
-	return bigInt;
+	var strArr = regularInt.toString().split('');
+	var intArr = strArr.map(function (str) {
+		return parseInt(str, 10);
+	});
+
+	return intArr;
 };
 
-var addBigInt = function (bigInt, regularInt, start) {
-	if (start < 0) {
-		bigInt.unshift(regularInt); // more than one digits could happen, so I need a bigInt ctor
-		return;
-	}
+var bigIntToString = function (bigInt) {
+	return bigInt.join('');
+}
 
-	var i = start !== undefined ? start : bigInt.length-1;
-	var tmp = bigInt[i] + regularInt;
-	var rest = tmp % 10;
-	var carryOver = Math.floor(tmp / 10);
+var addBigInt = function (a1, a2) {
+	var sum = [];
 
-	bigInt[i] = rest;
-	if (carryOver > 0) {
-		addBigInt(bigInt, carryOver, i-1);
-	}
-};
+	var largerInt = a1.length >= a2.length ? a1 : a2;
+	var smallerInt = a1.length < a2.length ? a1 : a2;
 
-var multiplyBigInt = function (bigInt, regularInt) {
-	if (regularInt === 0)
-		return bigInt.splice(0, bigInt.length, 0); // remove all, add 0
-
-	var carry = 0
-	for (var i = bigInt.length-1; i >= 0; i--) {
-		var tmp = bigInt[i] * regularInt;
-		var rest = tmp % 10;
-		var nextCarry = Math.floor(tmp / 10);
-
-		bigInt[i] = rest;
-		if (carry > 0) {
-			addBigInt(bigInt, carry, i);
+	var carry = 0;
+	for (var i = smallerInt.length-1, j = largerInt.length-1; j >= 0; i--, j--) {
+		var tmp = largerInt[j] + carry;
+		if (i >= 0) {
+			tmp += smallerInt[i];
 		}
-		carry = nextCarry;
+		var rest = tmp % 10;
+		var carryOver = Math.floor(tmp / 10);
+
+		sum.unshift(rest);
+		carry = carryOver;
 	}
 
-	// One left over
 	if (carry > 0)
-		addBigInt(bigInt, carry, i-1);
+		sum.unshift(carry);
+
+	return sum;
+};
+
+var multiplyBigInt = function (f1, f2) {
+	var largerInt = f1.length >= f2.length ? f1 : f2;
+	var smallerInt = f1.length < f2.length ? f1 : f2;
+
+	var toSum = [];
+	for (var j = smallerInt.length-1; j >= 0; j--) {
+		var partialProduct = [];
+		for (var grow=0; grow < smallerInt.length-j-1; grow++) {
+			partialProduct.push(0);
+		}
+
+		var carry = 0;
+		for (var i = largerInt.length-1; i >= 0; i--) {
+			var tmp = largerInt[i] * smallerInt[j] + carry;
+			var rest = tmp % 10;
+
+			carry = Math.floor(tmp / 10);
+			partialProduct.unshift(rest);
+		}
+
+		if (carry > 0)
+			partialProduct.unshift(carry);
+
+		toSum.push(partialProduct);
+	}
+
+	var product = toSum.reduce(function (product, p) {
+		return addBigInt(product, p);
+	});
+
+	return product;
 };
 
 var calcFactorial = function (factorialTarget, cache) {
-	var factorial = 1;
-	var bigInt = [1];
+	var bigInt = createBigInt(1);
 	for (var f = 1; f <= factorialTarget; f++) {
-		multiplyBigInt(bigInt, f);
+		bigInt = multiplyBigInt(bigInt, createBigInt(f));
 	}
 
-	return bigInt.join('');
+	return bigIntToString(bigInt);
 };
 
 
