@@ -1,6 +1,5 @@
 // http://www.spoj.com/problems/ACODE/
 
-var stdin = process.stdin;
 var endOfLine = require('os').EOL;
 
 var countPossibleDecodings = function (codedMessage, maxChar, numCharsToCheck, cache) {
@@ -76,14 +75,14 @@ var lines = (function () {
 
 // resume stdin in the parent process (node app won't quit all by itself
 // unless an error or process.exit() happens)
-stdin.resume();
+process.stdin.resume();
 
 // i don't want binary, do you?
-stdin.setEncoding( 'utf8' );
+process.stdin.setEncoding( 'utf8' );
 
 process.stdin.on('data', lines.addInput);
 // on data from stdin
-stdin.on('end', function(){
+process.stdin.on('end', function(){
 	lines.setup();
 
 	main(lines);
